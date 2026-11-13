@@ -1,0 +1,695 @@
+<title>Guarda de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F5F8F7; --surface:#FFFFFF; --surface-2:#EDF3F1; --surface-3:#E3EDEA;
+  --ink:#0F1F1C; --ink-2:#4A5C58; --ink-3:#71847F;
+  --line:#D5E2DE; --line-2:#BACCC7;
+  --primary:#0E6E63; --primary-soft:#D9EDE9; --primary-ink:#FFFFFF;
+  --ok:#136B3C; --ok-bg:#E2F2E8; --ok-line:#9DCFB2;
+  --err:#9C221B; --err-bg:#FBE8E6; --err-line:#E3ABA5;
+  --warn:#8A5200; --warn-bg:#FBEEDC;
+  --shadow:0 1px 2px rgba(15,31,28,.06), 0 8px 24px -12px rgba(15,31,28,.18);
+  --shadow-lg:0 2px 4px rgba(15,31,28,.06), 0 24px 48px -20px rgba(15,31,28,.28);
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1311; --surface:#121E1B; --surface-2:#1A2926; --surface-3:#223330;
+    --ink:#E9F1EE; --ink-2:#9FB4AE; --ink-3:#7A8E89;
+    --line:#25352F; --line-2:#33473F;
+    --primary:#4FC2B1; --primary-soft:#12302B; --primary-ink:#04201C;
+    --ok:#62D694; --ok-bg:#0F2E1E; --ok-line:#22543A;
+    --err:#FF9B92; --err-bg:#331714; --err-line:#5C2B26;
+    --warn:#E3A44A; --warn-bg:#2D2210;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    --shadow-lg:0 2px 4px rgba(0,0,0,.4), 0 24px 48px -20px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1311; --surface:#121E1B; --surface-2:#1A2926; --surface-3:#223330;
+  --ink:#E9F1EE; --ink-2:#9FB4AE; --ink-3:#7A8E89;
+  --line:#25352F; --line-2:#33473F;
+  --primary:#4FC2B1; --primary-soft:#12302B; --primary-ink:#04201C;
+  --ok:#62D694; --ok-bg:#0F2E1E; --ok-line:#22543A;
+  --err:#FF9B92; --err-bg:#331714; --err-line:#5C2B26;
+  --warn:#E3A44A; --warn-bg:#2D2210;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow-lg:0 2px 4px rgba(0,0,0,.4), 0 24px 48px -20px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.disp{font-family:"Archivo",-apple-system,"Segoe UI",sans-serif; text-wrap:balance; margin:0}
+.num{font-family:"Archivo",sans-serif; font-variant-numeric:tabular-nums}
+
+.wrap{max-width:720px; margin:0 auto; padding-inline:16px; padding-block:24px 48px}
+
+/* ---------- topo ---------- */
+.top{display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap}
+.mark{display:flex; align-items:center; gap:9px; margin-right:auto}
+.mark svg{display:block; flex:none}
+.mark b{font-family:"Archivo",sans-serif; font-weight:700; font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink)}
+.mark span{display:block; font-size:11.5px; color:var(--ink-3); letter-spacing:.05em; line-height:1.3}
+.ghost{
+  border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+  font:inherit; font-size:13px; padding:7px 13px; border-radius:99px; cursor:pointer;
+  transition:border-color .18s, color .18s, background .18s;
+}
+.ghost:hover{border-color:var(--primary); color:var(--primary)}
+
+/* ---------- progresso ---------- */
+.prog{display:flex; gap:3px; margin-bottom:8px}
+.prog i{
+  flex:1; height:5px; border-radius:99px; background:var(--line);
+  transition:background .35s ease, transform .35s ease; transform-origin:center;
+}
+.prog i.done{background:var(--ok)}
+.prog i.miss{background:var(--err)}
+.prog i.now{background:var(--primary); transform:scaleY(2)}
+.prog-txt{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-3); margin-bottom:20px; letter-spacing:.03em}
+
+/* ---------- cartao ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:26px 24px;
+}
+@media (max-width:480px){ .card{padding:20px 17px} }
+
+.eyebrow{
+  font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:600; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--primary); margin-bottom:12px;
+}
+.scene{
+  background:var(--surface-2); border-left:3px solid var(--line-2); border-radius:0 8px 8px 0;
+  padding:13px 16px; margin-bottom:18px; font-size:15px; color:var(--ink-2); font-style:italic;
+}
+.qtext{font-size:21px; font-weight:600; line-height:1.35; margin-bottom:20px}
+@media (max-width:480px){ .qtext{font-size:19px} }
+
+/* ---------- alternativas ---------- */
+.opts{display:flex; flex-direction:column; gap:10px}
+.opt{
+  display:flex; gap:13px; align-items:flex-start; width:100%; text-align:left;
+  background:var(--surface); border:1.5px solid var(--line); border-radius:11px;
+  padding:14px 15px; font:inherit; font-size:15.5px; color:var(--ink); cursor:pointer;
+  transition:border-color .16s, background .16s, transform .12s;
+}
+.opt:hover:not(:disabled){border-color:var(--primary); background:var(--primary-soft)}
+.opt:active:not(:disabled){transform:scale(.99)}
+.opt:disabled{cursor:default}
+.opt:focus-visible{outline:3px solid var(--primary); outline-offset:2px}
+.key{
+  flex:none; width:27px; height:27px; border-radius:7px; background:var(--surface-3);
+  color:var(--ink-2); font-family:"Archivo",sans-serif; font-weight:700; font-size:13.5px;
+  display:grid; place-items:center; transition:background .16s, color .16s;
+}
+.opt:hover:not(:disabled) .key{background:var(--primary); color:var(--primary-ink)}
+.opt.right{border-color:var(--ok-line); background:var(--ok-bg)}
+.opt.right .key{background:var(--ok); color:#fff}
+.opt.wrong{border-color:var(--err-line); background:var(--err-bg)}
+.opt.wrong .key{background:var(--err); color:#fff}
+.opt.dim{opacity:.5}
+
+/* ---------- feedback ---------- */
+.fb{
+  margin-top:16px; border-radius:11px; padding:15px 16px; border:1px solid;
+  font-size:15px; line-height:1.55;
+}
+.fb.ok{background:var(--ok-bg); border-color:var(--ok-line)}
+.fb.no{background:var(--err-bg); border-color:var(--err-line)}
+.fb h3{
+  font-size:13px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+  margin-bottom:7px; display:flex; align-items:center; gap:7px;
+}
+.fb.ok h3{color:var(--ok)} .fb.no h3{color:var(--err)}
+.fb p{margin:0; color:var(--ink-2)}
+.fb .law{
+  display:flex; align-items:center; gap:8px; margin-top:13px; padding-top:11px;
+  border-top:1px solid var(--line); font-size:13px; font-weight:600;
+  font-family:"Archivo",sans-serif; letter-spacing:.02em;
+}
+.fb.ok .law{color:var(--ok)} .fb.no .law{color:var(--err)}
+.fb .law svg{flex:none; opacity:.85}
+.next{
+  margin-top:18px; width:100%; background:var(--primary); color:var(--primary-ink);
+  border:none; border-radius:11px; padding:15px; font-family:"Archivo",sans-serif;
+  font-weight:600; font-size:16px; cursor:pointer; letter-spacing:.02em;
+  transition:filter .16s, transform .12s;
+}
+.next:hover{filter:brightness(1.08)} .next:active{transform:scale(.99)}
+.next:focus-visible{outline:3px solid var(--primary); outline-offset:3px}
+
+/* ---------- abertura ---------- */
+.hero h1{font-size:34px; font-weight:700; line-height:1.1; letter-spacing:-.02em; margin-bottom:12px}
+@media (max-width:480px){ .hero h1{font-size:27px} }
+.lede{font-size:17px; color:var(--ink-2); margin:0 0 22px}
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:22px}
+.fact{background:var(--surface-2); border-radius:10px; padding:13px 14px}
+.fact b{display:block; font-family:"Archivo",sans-serif; font-size:23px; font-weight:700; color:var(--primary); line-height:1.1}
+.fact span{font-size:12.5px; color:var(--ink-3); letter-spacing:.02em}
+.quiet{
+  border-left:3px solid var(--primary); background:var(--surface-2);
+  border-radius:0 8px 8px 0; padding:12px 15px; margin:0 0 22px;
+  font-size:14.5px; color:var(--ink-2);
+}
+.privacy{
+  border:1px dashed var(--line-2); border-radius:11px; padding:15px 16px; margin-bottom:22px;
+  background:var(--surface-2);
+}
+.privacy h3{font-size:12.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--primary); margin-bottom:8px; display:flex; gap:7px; align-items:center}
+.privacy p{margin:0; font-size:14.5px; color:var(--ink-2)}
+.privacy ul{margin:9px 0 0; padding-left:19px; font-size:14.5px; color:var(--ink-2)}
+.privacy li{margin-bottom:3px}
+
+/* ---------- resultado ---------- */
+.score-wrap{text-align:center; padding-block:6px 4px}
+.ring{position:relative; width:170px; height:170px; margin:0 auto 18px}
+.ring svg{transform:rotate(-90deg); display:block}
+.ring-mid{position:absolute; inset:0; display:grid; place-content:center; gap:0}
+.ring-mid b{font-family:"Archivo",sans-serif; font-size:46px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+.ring-mid span{font-size:13px; color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase; font-family:"Archivo",sans-serif}
+.verdict{font-size:23px; font-weight:700; margin-bottom:7px}
+.verdict-sub{color:var(--ink-2); font-size:15.5px; margin:0 auto 22px; max-width:46ch}
+
+.bd{margin-top:8px; border-top:1px solid var(--line); padding-top:18px}
+.bd h3{font-size:12.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin-bottom:13px}
+.row{display:flex; align-items:center; gap:11px; padding:8px 0; border-bottom:1px solid var(--line); font-size:14.5px}
+.row:last-child{border-bottom:none}
+.row .n{font-family:"Archivo",sans-serif; font-weight:700; font-size:12px; color:var(--ink-3); width:20px; flex:none; font-variant-numeric:tabular-nums}
+.row .t{flex:1; color:var(--ink-2); line-height:1.4}
+.pill{
+  flex:none; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  padding:3px 9px; border-radius:99px; font-family:"Archivo",sans-serif;
+}
+.pill.y{background:var(--ok-bg); color:var(--ok)}
+.pill.n{background:var(--err-bg); color:var(--err)}
+
+.code-box{
+  margin-top:20px; background:var(--surface-2); border:1px solid var(--line); border-radius:11px;
+  padding:16px; text-align:center;
+}
+.code-box span{font-size:12.5px; color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase; font-family:"Archivo",sans-serif}
+.code-box b{display:block; font-family:"Archivo",sans-serif; font-size:31px; font-weight:700; letter-spacing:.1em; color:var(--primary); margin-top:5px; font-variant-numeric:tabular-nums}
+
+.btn-row{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
+.btn-row button{flex:1; min-width:135px}
+.btn2{
+  background:var(--surface); color:var(--ink-2); border:1.5px solid var(--line);
+  border-radius:11px; padding:14px; font-family:"Archivo",sans-serif; font-weight:600;
+  font-size:15px; cursor:pointer; transition:border-color .16s, color .16s;
+}
+.btn2:hover{border-color:var(--primary); color:var(--primary)}
+
+/* ---------- painel ---------- */
+.panel-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:11px; margin-bottom:20px}
+.stat{background:var(--surface-2); border-radius:11px; padding:15px}
+.stat b{display:block; font-family:"Archivo",sans-serif; font-size:29px; font-weight:700; color:var(--primary); line-height:1.1; font-variant-numeric:tabular-nums}
+.stat span{font-size:12px; color:var(--ink-3); letter-spacing:.03em}
+.entry{display:flex; gap:9px; margin-bottom:16px; flex-wrap:wrap}
+.entry input{
+  flex:1; min-width:110px; background:var(--surface); border:1.5px solid var(--line);
+  border-radius:10px; padding:12px 13px; font:inherit; font-size:16px; color:var(--ink);
+  font-family:"Archivo",sans-serif; font-variant-numeric:tabular-nums;
+}
+.entry input:focus{outline:none; border-color:var(--primary)}
+.entry button{background:var(--primary); color:var(--primary-ink); border:none; border-radius:10px; padding:12px 20px; font-family:"Archivo",sans-serif; font-weight:600; font-size:15px; cursor:pointer}
+.tally{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:18px; min-height:34px}
+.chip{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:99px;
+  padding:5px 10px 5px 12px; font-family:"Archivo",sans-serif; font-size:13.5px; font-weight:600;
+  display:flex; align-items:center; gap:7px; font-variant-numeric:tabular-nums;
+}
+.chip button{background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:15px; line-height:1; padding:0 2px}
+.chip button:hover{color:var(--err)}
+.empty{color:var(--ink-3); font-size:14px; font-style:italic}
+
+.note{font-size:13.5px; color:var(--ink-3); margin-top:18px; line-height:1.5}
+.foot{text-align:center; font-size:12.5px; color:var(--ink-3); margin-top:26px; line-height:1.6}
+.foot a{color:var(--primary); text-decoration:none; border-bottom:1px solid var(--line-2)}
+
+#fx{position:fixed; inset:0; pointer-events:none; z-index:50}
+
+/* ---------- animacoes ---------- */
+@keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+@keyframes pop{0%{transform:scale(1)} 45%{transform:scale(1.035)} 100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)} 18%{transform:translateX(-7px)} 38%{transform:translateX(6px)} 58%{transform:translateX(-4px)} 78%{transform:translateX(3px)}}
+@keyframes grow{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+.anim-in{animation:rise .42s cubic-bezier(.2,.7,.3,1) both}
+.stagger{animation:rise .4s cubic-bezier(.2,.7,.3,1) both}
+.opt.right{animation:pop .5s ease}
+.opt.wrong{animation:shake .45s ease}
+.fb{animation:grow .3s ease both}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
+}
+</style>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div class="wrap">
+  <div class="top">
+    <div class="mark">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+        <path d="M15 2.5 4.5 6.4v8.1c0 6.4 4.4 11.6 10.5 13.1 6.1-1.5 10.5-6.7 10.5-13.1V6.4L15 2.5Z"
+              stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="color:var(--primary)"/>
+        <path d="M15 10.2v7.6M11.2 14h7.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--primary)"/>
+      </svg>
+      <div>
+        <b>Guarda de Dados</b>
+        <span>LGPD no Pré-Internamento · Hospital Santa Izabel</span>
+      </div>
+    </div>
+    <button class="ghost" id="theme" type="button">Tema</button>
+  </div>
+
+  <main id="app" aria-live="polite"></main>
+
+  <p class="foot">
+    Ação de extensão universitária · UNINASSAU — Análise e Desenvolvimento de Sistemas<br>
+    Felipe Carvalho Santos da Silva · 2026 · <a href="#painel" id="plink">Painel do facilitador</a>
+  </p>
+</div>
+
+<script>
+"use strict";
+
+/* ====== BANCO DE QUESTOES ====== */
+const Q = [
+{
+ scene:"Uma paciente chega ao balcão para internamento eletivo e entrega RG, carteirinha do convênio e o pedido médico com o diagnóstico.",
+ q:"Segundo a LGPD, como se classifica o diagnóstico que consta nesse pedido médico?",
+ opts:[
+  "Dado pessoal comum, igual ao nome e ao RG",
+  "Dado pessoal sensível, com proteção reforçada",
+  "Informação pública, pois está num documento impresso",
+  "Não é dado pessoal, porque se refere a uma doença"],
+ a:1,
+ ok:"Isso. Dado de saúde é dado pessoal sensível — a lei dá a ele um regime mais rígido que o do nome ou do RG.",
+ no:"Dado de saúde é dado pessoal <b>sensível</b>. Ele exige base legal específica e proteção maior do que dados comuns como nome e RG. Estar impresso num papel não torna nada público.",
+ law:"LGPD, art. 5º, II"
+},
+{
+ scene:"São 11h40. Você precisa ir até o setor de autorizações entregar uma guia e volta em cinco minutos.",
+ q:"O que fazer com o computador antes de sair do posto?",
+ opts:[
+  "Deixar como está, já que a ausência é curta",
+  "Minimizar as janelas do sistema",
+  "Bloquear a sessão com Windows + L",
+  "Pedir ao colega ao lado para ficar de olho"],
+ a:2,
+ ok:"Exato. Bloquear leva um segundo e é o controle mais barato que existe contra acesso indevido.",
+ no:"Minimizar janela não impede ninguém de abri-la, e pedir para um colega vigiar não é controle de acesso. <b>Windows + L</b> bloqueia a sessão e mantém o seu login protegido — vale mesmo para uma ausência de um minuto.",
+ law:"ABNT NBR ISO/IEC 27002 — tela e mesa limpa"
+},
+{
+ scene:"A operadora pede urgência numa autorização. Uma colega sugere: “tira foto da guia e manda no meu WhatsApp que eu envio pra eles”.",
+ q:"Qual a conduta correta?",
+ opts:[
+  "Enviar, já que é urgente e a colega é do setor",
+  "Enviar, mas apagar a foto do celular depois",
+  "Usar apenas o canal institucional definido pelo hospital",
+  "Enviar pelo WhatsApp e avisar a chefia depois"],
+ a:2,
+ ok:"Correto. Urgência não cria base legal. O canal institucional é o único caminho.",
+ no:"Apagar depois não resolve: a imagem já passou por um aplicativo pessoal, por backup em nuvem e pela galeria do aparelho. Documento de paciente sai apenas pelo <b>canal institucional</b> — e-mail corporativo ou portal da operadora.",
+ law:"LGPD, art. 46 — medidas de segurança"
+},
+{
+ scene:"Um colega recém-contratado ainda não recebeu o login do sistema e pede o seu “só até sexta, pra não travar o atendimento”.",
+ q:"O que você faz?",
+ opts:[
+  "Empresto, porque o atendimento não pode parar",
+  "Empresto e troco a senha na sexta",
+  "Recuso e aciono o responsável para liberar o acesso dele",
+  "Digito a senha eu mesmo sempre que ele precisar"],
+ a:2,
+ ok:"Isso mesmo. Credencial é pessoal e intransferível — tudo que for feito com ela é registrado como seu.",
+ no:"Toda ação do sistema fica registrada no <b>seu</b> nome. Se algo for consultado ou alterado indevidamente, a trilha de auditoria aponta para você. A saída é acionar o responsável e liberar o acesso próprio dele. Pelo mesmo motivo, use senha longa e exclusiva e ative a verificação em duas etapas onde estiver disponível.",
+ law:"Princípio do menor privilégio · responsabilização"
+},
+{
+ scene:"Um homem se apresenta como filho de uma paciente internada e pede o número da guia e a data prevista da cirurgia dela.",
+ q:"Como proceder?",
+ opts:[
+  "Informar, já que é parente de primeiro grau",
+  "Informar apenas a data, que é menos sensível",
+  "Confirmar se ele está autorizado pela paciente antes de qualquer informação",
+  "Informar se ele apresentar o próprio documento de identidade"],
+ a:2,
+ ok:"Certo. Quem decide sobre o dado é o titular — parentesco, por si só, não autoriza nada.",
+ no:"O titular do dado é a <b>paciente</b>, e só ela autoriza o acesso. Parentesco não é autorização, e o documento do visitante prova apenas quem ele é, não que ele pode receber a informação. Verifique o cadastro de acompanhante autorizado.",
+ law:"LGPD, art. 17 e 18 — direitos do titular"
+},
+{
+ scene:"O telefone toca: “aqui é da auditoria do convênio, preciso confirmar urgente o CPF e a data de nascimento de três pacientes que internaram ontem”.",
+ q:"Qual a melhor resposta?",
+ opts:[
+  "Passar os dados, pois a auditoria do convênio tem direito de acesso",
+  "Passar só o CPF, que já está na guia mesmo",
+  "Encerrar e retornar pelo telefone oficial cadastrado da operadora",
+  "Pedir que a pessoa envie um e-mail e então responder por telefone"],
+ a:2,
+ ok:"Isso. Pressa e autoridade são exatamente as alavancas da engenharia social — retornar pelo canal oficial derruba o golpe.",
+ no:"Esse é o roteiro clássico de <b>engenharia social por telefone</b>: autoridade, urgência e um pedido que parece rotineiro. Quem ligou pode ser qualquer um. Encerre e retorne pelo número oficial cadastrado da operadora — se for legítimo, a ligação se confirma.",
+ law:"Engenharia social · verificação por canal independente"
+},
+{
+ scene:"No fim do plantão sobraram guias impressas com erro, etiquetas de identificação e uma folha de conferência com nomes e diagnósticos.",
+ q:"Qual o destino correto desse material?",
+ opts:[
+  "Lixo comum, depois de rasgar ao meio",
+  "Fragmentadora ou descarte seguro definido pelo hospital",
+  "Reaproveitar como rascunho no verso",
+  "Caixa de papel para reciclagem do setor"],
+ a:1,
+ ok:"Exato. Papel com dado de paciente sai do setor destruído, nunca legível.",
+ no:"Rasgar ao meio não destrói nada — papel rasgado é remontável, e lixo comum e caixa de reciclagem saem do prédio sem controle. Usar o verso como rascunho espalha o dado pelo setor. Use a <b>fragmentadora</b> ou o descarte seguro definido pelo hospital.",
+ law:"Ciclo de vida do dado · descarte seguro"
+},
+{
+ scene:"Chega um e-mail: “Sua senha do sistema expira em 2 horas. Clique aqui para revalidar seu acesso.” O remetente parece ser da TI.",
+ q:"Qual o primeiro sinal de que isso pode ser um golpe?",
+ opts:[
+  "O e-mail estar escrito em português",
+  "A urgência combinada com um link para digitar a senha",
+  "Ter chegado fora do horário comercial",
+  "Não ter anexo"],
+ a:1,
+ ok:"Isso. Prazo curto mais link para digitar senha é a assinatura do phishing.",
+ no:"A marca do <b>phishing</b> é a combinação de urgência artificial com um link que pede credenciais. Idioma, horário e ausência de anexo não dizem nada. Na dúvida, não clique: acesse o sistema pelo caminho de sempre e avise a TI.",
+ law:"OWASP · phishing e roubo de credenciais"
+},
+{
+ scene:"Uma paciente conhecida na cidade dá entrada para cirurgia. O grupo de WhatsApp do setor começa a comentar.",
+ q:"Qual a conduta correta?",
+ opts:[
+  "Comentar apenas no grupo interno, que é fechado",
+  "Confirmar só se alguém de fora perguntar primeiro",
+  "Não comentar em nenhum canal, interno ou externo",
+  "Comentar sem citar o nome completo do paciente"],
+ a:2,
+ ok:"Certo. O dever de sigilo não tem exceção para grupo fechado nem para paciente famoso.",
+ no:"Grupo fechado não é canal seguro: qualquer participante encaminha, e a conversa vira registro permanente. Omitir o sobrenome também não protege quem é publicamente identificável. O <b>dever de sigilo</b> vale igual para todos os pacientes.",
+ law:"Dever de sigilo profissional · LGPD, art. 6º, I"
+},
+{
+ scene:"Você percebe que uma planilha com nomes e procedimentos de pacientes foi enviada por engano para o endereço errado.",
+ q:"O que fazer primeiro?",
+ opts:[
+  "Aguardar para ver se alguém reclama",
+  "Apagar a planilha do seu computador para não deixar rastro",
+  "Comunicar imediatamente o responsável pelo setor e a área de segurança",
+  "Pedir por e-mail que o destinatário apague a mensagem e encerrar o assunto"],
+ a:2,
+ ok:"Isso. Incidente se comunica na hora — o prazo de resposta da instituição começa a correr.",
+ no:"Isso é um <b>incidente de segurança</b>, e o hospital pode ter de comunicar a autoridade nacional e os titulares afetados. Esperar, apagar rastros ou resolver sozinho com o destinatário só atrasa a resposta e agrava a responsabilidade. Comunique de imediato.",
+ law:"LGPD, art. 48 — comunicação de incidente"
+}
+];
+
+/* ====== ESTADO ====== */
+const app = document.getElementById("app");
+let i = 0, answers = [], locked = false;
+const L = ["A","B","C","D"];
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ====== TEMA ====== */
+const root = document.documentElement;
+document.getElementById("theme").addEventListener("click", () => {
+  const dark = root.getAttribute("data-theme") === "dark"
+    || (!root.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme:dark)").matches);
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+});
+
+/* ====== HELPERS ====== */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function store(k, v){ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
+
+function progressBar(){
+  let h = '<div class="prog">';
+  for(let k = 0; k < Q.length; k++){
+    let c = "";
+    if(k < answers.length) c = answers[k].correct ? "done" : "miss";
+    else if(k === i) c = "now";
+    h += `<i class="${c}"></i>`;
+  }
+  const acertos = answers.filter(a => a.correct).length;
+  return h + `</div><div class="prog-txt"><span>Questão ${i+1} de ${Q.length}</span><span class="num">${acertos} ${acertos===1?"acerto":"acertos"}</span></div>`;
+}
+
+/* ====== TELAS ====== */
+function start(){
+  app.innerHTML = `
+  <div class="card hero anim-in">
+    <div class="eyebrow">Atividade de encerramento</div>
+    <h1>Dez situações do seu dia de trabalho</h1>
+    <p class="lede">Cada questão descreve uma cena que acontece de verdade no Pré-Internamento. Escolha o que você faria — e veja na hora o que a lei diz sobre isso, com o artigo que trata do assunto.</p>
+
+    <div class="facts">
+      <div class="fact"><b class="num">10</b><span>situações reais</span></div>
+      <div class="fact"><b class="num">~5</b><span>minutos</span></div>
+      <div class="fact"><b class="num">4</b><span>alternativas cada</span></div>
+    </div>
+
+    <p class="quiet">Atividade anônima e voluntária. Responda pensando no seu dia de trabalho, não no que “soa certo”.</p>
+
+    <button class="next" id="go" type="button">Começar</button>
+  </div>`;
+  document.getElementById("go").addEventListener("click", () => { i = 0; answers = []; render(); });
+}
+
+function render(){
+  locked = false;
+  const q = Q[i];
+  let opts = "";
+  q.opts.forEach((o, k) => {
+    const delay = reduced ? 0 : 0.05 + k * 0.055;
+    opts += `<button class="opt stagger" style="animation-delay:${delay}s" data-k="${k}" type="button">
+      <span class="key">${L[k]}</span><span>${esc(o)}</span></button>`;
+  });
+
+  app.innerHTML = `
+    ${progressBar()}
+    <div class="card anim-in" id="qcard">
+      <div class="eyebrow">Situação ${i+1}</div>
+      <div class="scene">${esc(q.scene)}</div>
+      <div class="qtext">${esc(q.q)}</div>
+      <div class="opts" id="opts">${opts}</div>
+      <div id="fbhost"></div>
+    </div>`;
+
+  document.querySelectorAll(".opt").forEach(b =>
+    b.addEventListener("click", () => answer(parseInt(b.dataset.k, 10))));
+}
+
+function answer(k){
+  if(locked) return;
+  locked = true;
+  const q = Q[i], correct = k === q.a;
+  answers[i] = { correct, chosen: k };
+
+  document.querySelectorAll(".opt").forEach((b, idx) => {
+    b.disabled = true;
+    b.style.animationDelay = "0s";
+    if(idx === q.a) b.classList.add("right");
+    else if(idx === k) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+
+  const host = document.getElementById("fbhost");
+  const last = i === Q.length - 1;
+  host.innerHTML = `
+    <div class="fb ${correct ? "ok" : "no"}">
+      <h3>${correct
+        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg> Resposta certa'
+        : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5M12 16.5v.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="2.2"/></svg> Vale revisar'}</h3>
+      <p>${correct ? q.ok : q.no}</p>
+      <span class="law"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v18M5 7h14M7 7l-3 6a3.2 3.2 0 0 0 6 0L7 7Zm10 0-3 6a3.2 3.2 0 0 0 6 0l-3-6Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>${esc(q.law)}</span>
+    </div>
+    <button class="next" id="nx" type="button">${last ? "Ver meu resultado" : "Próxima situação"}</button>`;
+
+  // atualiza a barra sem redesenhar a tela
+  const bars = document.querySelectorAll(".prog i");
+  if(bars[i]){ bars[i].className = correct ? "done" : "miss"; }
+
+  const nx = document.getElementById("nx");
+  nx.addEventListener("click", () => { if(last){ result(); } else { i++; render(); window.scrollTo({top:0, behavior: reduced ? "auto" : "smooth"}); } });
+  nx.focus({ preventScroll:true });
+}
+
+function result(){
+  const hits = answers.filter(a => a.correct).length;
+  const pct = Math.round(hits / Q.length * 100);
+  let title, sub;
+  if(hits >= 9){ title = "Conhecimento sólido"; sub = "Você reconhece os riscos do setor e sabe a conduta correta na maioria das situações. Mantenha o checklist por perto e ajude a orientar quem chega."; }
+  else if(hits >= 7){ title = "Bom caminho"; sub = "A base está firme. Revise na cartilha os pontos marcados abaixo — são justamente os que mais aparecem em incidentes reais."; }
+  else if(hits >= 4){ title = "Precisa de reforço"; sub = "Vários pontos importantes ficaram pelo caminho. A cartilha entregue ao setor cobre cada um deles em linguagem direta."; }
+  else { title = "Vamos retomar"; sub = "Sem problema — é exatamente para isso que a capacitação existe. Vale refazer depois de ler a cartilha."; }
+
+  const R = 76, C = 2 * Math.PI * R;
+  const rows = Q.map((q, k) => `
+    <div class="row">
+      <span class="n">${String(k+1).padStart(2,"0")}</span>
+      <span class="t">${esc(q.q)}</span>
+      <span class="pill ${answers[k] && answers[k].correct ? "y" : "n"}">${answers[k] && answers[k].correct ? "acertou" : "revisar"}</span>
+    </div>`).join("");
+
+  app.innerHTML = `
+    <div class="card anim-in">
+      <div class="score-wrap">
+        <div class="ring">
+          <svg width="170" height="170" viewBox="0 0 170 170">
+            <circle cx="85" cy="85" r="${R}" fill="none" stroke="var(--surface-3)" stroke-width="13"/>
+            <circle id="arc" cx="85" cy="85" r="${R}" fill="none" stroke="var(--primary)" stroke-width="13"
+                    stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"
+                    style="transition:stroke-dashoffset 1.1s cubic-bezier(.2,.7,.3,1)"/>
+          </svg>
+          <div class="ring-mid"><b class="num" id="cnt">0</b><span>de ${Q.length}</span></div>
+        </div>
+        <div class="verdict">${title}</div>
+        <p class="verdict-sub">${sub}</p>
+      </div>
+
+      <div class="code-box">
+        <span>Informe este número ao facilitador</span>
+        <b class="num">${hits} / ${Q.length}</b>
+      </div>
+
+      <div class="bd">
+        <h3>Como você foi em cada situação</h3>
+        ${rows}
+      </div>
+
+      <div class="btn-row">
+        <button class="next" id="again" type="button">Refazer</button>
+        <button class="btn2" id="toStart" type="button">Tela inicial</button>
+      </div>
+    </div>`;
+
+  requestAnimationFrame(() => {
+    const arc = document.getElementById("arc");
+    if(arc) arc.style.strokeDashoffset = String(C * (1 - hits / Q.length));
+    countUp(document.getElementById("cnt"), hits);
+  });
+  if(hits >= 7) burst();
+
+  document.getElementById("again").addEventListener("click", () => { i = 0; answers = []; render(); window.scrollTo({top:0}); });
+  document.getElementById("toStart").addEventListener("click", () => { start(); window.scrollTo({top:0}); });
+}
+
+function countUp(el, to){
+  if(!el) return;
+  if(reduced || to === 0){ el.textContent = String(to); return; }
+  const dur = 900, t0 = performance.now();
+  (function step(t){
+    const p = Math.min(1, (t - t0) / dur);
+    el.textContent = String(Math.round(to * (1 - Math.pow(1 - p, 3))));
+    if(p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ====== CONFETE ====== */
+const cv = document.getElementById("fx"), ctx = cv.getContext("2d");
+function sizeCanvas(){ cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio;
+  cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px"; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+sizeCanvas(); addEventListener("resize", sizeCanvas);
+
+function burst(){
+  if(reduced) return;
+  const cs = ["#0E6E63","#4FC2B1","#136B3C","#8A5200","#BACCC7"];
+  const ps = [];
+  for(let n = 0; n < 90; n++){
+    ps.push({ x: innerWidth/2 + (Math.random()-.5)*170, y: innerHeight*0.34,
+      vx: (Math.random()-.5)*7, vy: Math.random()*-9 - 3,
+      w: 5 + Math.random()*6, h: 3 + Math.random()*5,
+      r: Math.random()*Math.PI, vr: (Math.random()-.5)*.32,
+      c: cs[(Math.random()*cs.length)|0], life: 0 });
+  }
+  let raf;
+  (function loop(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    let alive = false;
+    for(const p of ps){
+      p.life++; p.vy += 0.26; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.vx *= 0.995;
+      if(p.y < innerHeight + 40){ alive = true;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+        ctx.globalAlpha = Math.max(0, 1 - p.life/130);
+        ctx.fillStyle = p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+      }
+    }
+    if(alive) raf = requestAnimationFrame(loop); else { ctx.clearRect(0,0,innerWidth,innerHeight); cancelAnimationFrame(raf); }
+  })();
+}
+
+/* ====== PAINEL DO FACILITADOR ====== */
+function panel(){
+  const data = store("hsi_scores") || [];
+  const n = data.length;
+  const soma = data.reduce((s,v) => s+v, 0);
+  const media = n ? (soma/n) : 0;
+  const pct = n ? Math.round(media / Q.length * 100) : 0;
+  const chips = n
+    ? data.map((v,k) => `<span class="chip">${v}/${Q.length}<button data-k="${k}" title="remover" type="button">&times;</button></span>`).join("")
+    : '<span class="empty">Nenhum resultado lançado ainda.</span>';
+
+  app.innerHTML = `
+    <div class="card anim-in">
+      <div class="eyebrow">Uso interno</div>
+      <h1 style="font-size:26px;margin-bottom:8px">Painel do facilitador</h1>
+      <p class="lede" style="font-size:15.5px">Lance aqui o número que cada participante informar na tela final. Os dados ficam só neste aparelho e servem para compor o relatório da ação.</p>
+
+      <div class="panel-grid">
+        <div class="stat"><b class="num">${n}</b><span>respondentes</span></div>
+        <div class="stat"><b class="num">${n ? media.toFixed(1) : "—"}</b><span>média de acertos</span></div>
+        <div class="stat"><b class="num">${n ? pct + "%" : "—"}</b><span>índice médio</span></div>
+      </div>
+
+      <div class="entry">
+        <input id="sc" type="number" min="0" max="${Q.length}" inputmode="numeric" placeholder="Acertos (0 a ${Q.length})">
+        <button id="add" type="button">Lançar</button>
+      </div>
+      <div class="tally">${chips}</div>
+
+      <div class="btn-row">
+        <button class="btn2" id="csv" type="button">Copiar como CSV</button>
+        <button class="btn2" id="clr" type="button">Limpar tudo</button>
+        <button class="next" id="back" type="button" style="flex:1 1 100%">Voltar ao início</button>
+      </div>
+      <p class="note">Somente números de acertos são guardados — nenhum nome, nenhuma identificação. Isso mantém a ferramenta fora do alcance da LGPD, por se tratar de dado anonimizado (art. 12).</p>
+    </div>`;
+
+  const inp = document.getElementById("sc");
+  const push = () => {
+    const v = parseInt(inp.value, 10);
+    if(isNaN(v) || v < 0 || v > Q.length){ inp.focus(); return; }
+    const d = store("hsi_scores") || []; d.push(v); store("hsi_scores", d); panel();
+    const f = document.getElementById("sc"); if(f) f.focus();
+  };
+  document.getElementById("add").addEventListener("click", push);
+  inp.addEventListener("keydown", e => { if(e.key === "Enter") push(); });
+  document.querySelectorAll(".chip button").forEach(b => b.addEventListener("click", () => {
+    const d = store("hsi_scores") || []; d.splice(parseInt(b.dataset.k,10), 1); store("hsi_scores", d); panel();
+  }));
+  document.getElementById("clr").addEventListener("click", () => { store("hsi_scores", []); panel(); });
+  document.getElementById("csv").addEventListener("click", () => {
+    const d = store("hsi_scores") || [];
+    const txt = "participante;acertos;total\n" + d.map((v,k) => `${k+1};${v};${Q.length}`).join("\n");
+    const b = document.getElementById("csv");
+    if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(() => { b.textContent = "Copiado"; setTimeout(() => b.textContent = "Copiar como CSV", 1600); }); }
+  });
+  document.getElementById("back").addEventListener("click", () => { location.hash = ""; start(); });
+}
+
+/* ====== ROTA ====== */
+function route(){ if(location.hash === "#painel") panel(); else start(); }
+addEventListener("hashchange", route);
+route();
+</script>
